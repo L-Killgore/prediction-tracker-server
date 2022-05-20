@@ -5,6 +5,8 @@ const jwtGenerator = require("./utils/jwtGenerator");
 const authorization = require("./middleware/authorization");
 const cors = require("cors");
 const express = require("express");
+const path = require('path');
+// const apiRouter = require("./api");
 const morgan = require("morgan");
 const db = require("./db");
 const validateCredentials = require("./middleware/validateCredentials");
@@ -14,7 +16,40 @@ const app = express();
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
+// app.use("/api", apiRouter);
 
+
+// Serve React build files in production
+if (process.env.NODE_ENV === 'production') {
+    // Serve the frontend's index.html file at the root route
+    app.get('/', (req, res) => {
+        res.cookie('XSRF-TOKEN', req.csrfToken());
+        res.sendFile(
+            path.resolve(__dirname, '../client', 'build', 'index.html')
+        );
+    });
+  
+    // Serve the static assets in the frontend's build folder
+    app.use(express.static(path.resolve("../client/build")));
+  
+    // Serve the frontend's index.html file at all other routes NOT starting with /api
+    app.get(/^(?!\/?api).*/, (req, res) => {
+        res.cookie('XSRF-TOKEN', req.csrfToken());
+        res.sendFile(
+            path.resolve(__dirname, '../client', 'build', 'index.html')
+        );
+    });
+};
+  
+// Add a XSRF-TOKEN cookie in development
+if (process.env.NODE_ENV !== 'production') {
+    app.get('/api/csrf/restore', (req, res) => {
+            res.cookie('XSRF-TOKEN', req.csrfToken());
+            res.status(201).json({});
+    });
+};
+
+module.exports = app;
 
 // ROUTE HANDLERS
 
@@ -35,10 +70,6 @@ app.get("/api/v1/predictions", async (req, res) => {
         console.log(err);
     };
 });
-
-// SELECT *, CASE WHEN timeframe <= NOW() THEN status='expired' END FROM predictions;
-// SELECT claim_title, timeframe, CASE WHEN timeframe <= NOW() THEN status='expired' END FROM predictions;
-
 
 // get all predictions whose timeframe date has passed
 app.get("/api/v1/predictions/timeframe", async (req, res) => {
