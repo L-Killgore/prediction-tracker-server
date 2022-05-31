@@ -3,7 +3,9 @@ CREATE TABLE accounts (
     username VARCHAR ( 255 ) UNIQUE NOT NULL,
     password VARCHAR ( 255 ) NOT NULL,
     email VARCHAR ( 255 ) UNIQUE NOT NULL,
-    prediction_score INT DEFAULT 0
+    prediction_score INT DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE predictions (
@@ -13,7 +15,7 @@ CREATE TABLE predictions (
     claim_title VARCHAR ( 100 ) NOT NULL,
     claim_major VARCHAR ( 264 ) NOT NULL,
     post_time TIMESTAMPTZ NOT NULL,
-    timeframe DATE NOT NULL,
+    timeframe TIMESTAMPTZ NOT NULL,
     status VARCHAR ( 10 ) NOT NULL,
     conc_reason TEXT,
     conc_reason_timestamp TIMESTAMPTZ
@@ -33,7 +35,7 @@ CREATE TABLE votes (
     correct BOOLEAN
 );
 
-CREATE TABLE predictionVoteTallies (
+CREATE TABLE prediction_vote_tallies (
     tally_id SERIAL PRIMARY KEY,
     prediction_id INT NOT NULL REFERENCES predictions(prediction_id) ON DELETE CASCADE,
     plausible INT DEFAULT 0,
