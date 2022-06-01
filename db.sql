@@ -18,13 +18,17 @@ CREATE TABLE predictions (
     timeframe TIMESTAMPTZ NOT NULL,
     status VARCHAR ( 10 ) NOT NULL,
     conc_reason TEXT,
-    conc_reason_timestamp TIMESTAMPTZ
+    conc_reason_timestamp TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE reasons (
     reason_id SERIAL PRIMARY KEY,
     prediction_id INT NOT NULL REFERENCES predictions(prediction_id) ON DELETE CASCADE,
-    reason TEXT NOT NULL
+    reason TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE votes (
@@ -32,7 +36,9 @@ CREATE TABLE votes (
     prediction_id INT NOT NULL REFERENCES predictions(prediction_id) ON DELETE CASCADE,
     user_id INT NOT NULL REFERENCES accounts(user_id) ON DELETE CASCADE,
     plausible BOOLEAN,
-    correct BOOLEAN
+    correct BOOLEAN,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE prediction_vote_tallies (
@@ -41,7 +47,9 @@ CREATE TABLE prediction_vote_tallies (
     plausible INT DEFAULT 0,
     implausible INT DEFAULT 0,
     correct INT DEFAULT 0,
-    incorrect INT DEFAULT 0
+    incorrect INT DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
 );
 
 

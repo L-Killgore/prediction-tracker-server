@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
         };
 
         // check if JWT is valid
-        const verification = jwt.verify(jwtToken, process.env.jwtSecret);
+        const verification = jwt.verify(jwtToken, process.env.JWTSECRET);
         req.user = verification.user;
 
         next();

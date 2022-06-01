@@ -642,7 +642,7 @@ app.post("/api/v1/accounts/register", validateCredentials, async (req, res) => {
       where: { email: email }
     });
 
-    if (user.length !== 0 && userEmail.length !== 0) {
+    if (user || userEmail) {
       return res.status(401).json({
         status: "username and email exist",
         message: {
@@ -650,12 +650,12 @@ app.post("/api/v1/accounts/register", validateCredentials, async (req, res) => {
           email_exists: "Failed to register: Email already in use."
         }
       });
-    } else if (user.length !== 0) {
+    } else if (user) {
       return res.status(401).json({
         status: "username exists",
         message: "Failed to register: Username already exists."
       });
-    } else if (userEmail.length !== 0) {
+    } else if (userEmail) {
       return res.status(401).json({
         status: "email exists",
         message: "Failed to register: Email already in use."
@@ -671,7 +671,7 @@ app.post("/api/v1/accounts/register", validateCredentials, async (req, res) => {
       password: bcryptPassword,
       email: email
     });
-
+    
     const token = jwtGenerator(results.user_id);
     res.status(201).json({
       status: "success",
@@ -694,7 +694,7 @@ app.post("/api/v1/accounts/login", validateCredentials, async (req, res) => {
       where: { username: username }
     });
 
-    if (user.length === 0) {
+    if (!user) {
       return res.status(401).json({
         status: "username failure",
         message: "Failed to log in: Username is incorrect."
