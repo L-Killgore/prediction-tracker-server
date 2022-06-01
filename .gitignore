@@ -131,4 +131,6 @@ Next.js
 .yarn/install-state.gz
 .pnp.*
 
-
+# Misellaneous
+.DS_Store
+server_OLD.js
