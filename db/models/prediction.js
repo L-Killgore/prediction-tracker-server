@@ -53,8 +53,7 @@ module.exports = (sequelize) => {
     models.Prediction.belongsTo(models.Account, { foreignKey: "user_id" });
     models.Prediction.hasMany(models.Reason, { foreignKey: "prediction_id" });
     models.Prediction.hasMany(models.Vote, { foreignKey: "prediction_id" });
-    models.Prediction.hasMany(models.PredictionVoteTally, { foreignKey: "prediction_id" });
-    // models.Prediction.hasOne(models.PredictionVoteTally, { foreignKey: "prediction_id" });
+    models.Prediction.hasOne(models.PredictionVoteTally, { foreignKey: "prediction_id" });
 
   };
 
