@@ -186,8 +186,6 @@ app.delete("/api/v1/predictions/incomplete/:user_id", async (req, res) => {
       }
     });
 
-    console.log('deleted shit')
-
     res.status(204).json({
       status: "success",
       message: 'Successfully deleted prediction.'
