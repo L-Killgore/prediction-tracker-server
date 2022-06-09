@@ -22,15 +22,16 @@ app.use(express.json());
 
 // PREDICTIONS
 // get all predictions
-app.get("/api/v1/predictions", async (req, res) => {
+app.get("/api/v1/predictions/all", async (req, res) => {
   try {
     const results = await db.Prediction.findAll({
       include: [
         { model: db.Account },
         { model: db.PredictionVoteTally }
-      ]
+      ],
+      order: [['post_time', 'DESC']]
     });
-
+    
     res.status(200).json({
       status: "success",
       message: "Successfully gathered all predictions.",
