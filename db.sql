@@ -13,6 +13,7 @@ CREATE TABLE predictions (
     user_id INT NOT NULL REFERENCES accounts(user_id) ON DELETE CASCADE,
     user_prediction_status VARCHAR ( 7 ) NOT NULL,
     claim_title VARCHAR ( 100 ) NOT NULL,
+    -- consider increasing claim_title limit to 264 as well
     claim_major VARCHAR ( 264 ) NOT NULL,
     post_time TIMESTAMPTZ NOT NULL,
     timeframe TIMESTAMPTZ NOT NULL,
