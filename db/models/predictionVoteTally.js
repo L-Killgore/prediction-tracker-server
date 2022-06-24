@@ -37,7 +37,6 @@ module.exports = (sequelize) => {
   });
 
   PredictionVoteTally.associate = models => {
-    // models.PredictionVoteTally.belongsTo(models.Prediction);
     models.PredictionVoteTally.belongsTo(models.Prediction, { foreignKey: "prediction_id" });
   };
 

@@ -24,7 +24,6 @@ module.exports = (sequelize) => {
   });
 
   Reason.associate = models => {
-    // models.Reason.belongsTo(models.Prediction);
     models.Reason.belongsTo(models.Prediction, { foreignKey: "prediction_id" })
   };
 

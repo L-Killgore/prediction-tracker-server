@@ -20,6 +20,139 @@ app.use(express.json());
 
 // ROUTE HANDLERS
 
+// COMMENTS
+// get all comments
+app.get("/api/v1/comments/all", async (req, res) => {
+  try {
+    const results = await db.Comment.findAll({
+      include: [
+        { model: db.Account }
+      ]
+    });
+    
+    res.status(200).json({
+      status: "success",
+      message: "Successfully gathered all comments.",
+      results: results.length,
+      data: {
+        comments: results
+      }
+    });
+
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// get all comments for a specific prediction
+app.get("/api/v1/comments/:prediction_id", async (req, res) => {
+  try {
+    const { prediction_id } = req.params;
+
+    const results = await db.Comment.findAll({
+      where: { prediction_id: prediction_id },
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: `Successfully gathered all comments for prediction with id = ${results.prediction_id}`,
+      data: {
+        comments: results,
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// create comment
+app.post("/api/v1/comments/create", async (req, res) => {
+  try {
+    const { prediction_id, user_id, username, parent_id, comment_count, child_value, comment } = req.body;
+
+    const results = await db.Comment.create({
+      prediction_id,
+      user_id,
+      username,
+      parent_id,
+      comment_count,
+      child_value,
+      comment,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Successfully created a comment.",
+      data: {
+        comment: results,
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// update comment (just for like and dislike count right now)
+app.put("/api/v1/comments/:parameter/:prediction_comment_id", async (req, res) => {
+  try {
+    const { likes, dislikes } = req.body;
+    const { prediction_comment_id, parameter } = req.params;
+
+    if (parameter === "like") {
+      const results = await db.Comment.increment({
+        like: 1
+      }, {
+        where: { prediction_comment_id: prediction_comment_id }
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: `Successfully updated like count for comment with id = ${prediction_comment_id}.`,
+        data: {
+          comment: results,
+        }
+      });
+    } else if (parameter === "dislike") {
+      const results = await db.Comment.increment({
+        dislike: 1
+      }, {
+        where: { prediction_comment_id: prediction_comment_id }
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: `Successfully updated like count for comment with id = ${prediction_comment_id}.`,
+        data: {
+          comment: results,
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// delete comment
+app.delete("/api/v1/comments/:prediction_comment_id", async (req, res) => {
+  try {
+    const { prediction_comment_id } = req.params;
+
+    await db.Comment.destroy({
+      where: { prediction_comment_id: prediction_comment_id }
+    });
+
+    res.status(204).json({
+      status: "success",
+      message: 'Successfully deleted comment.'
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+
+
 // PREDICTIONS
 // get all predictions
 app.get("/api/v1/predictions/all", async (req, res) => {
@@ -27,6 +160,7 @@ app.get("/api/v1/predictions/all", async (req, res) => {
     const results = await db.Prediction.findAll({
       include: [
         { model: db.Account },
+        { model: db.Comment },
         { model: db.PredictionVoteTally }
       ],
       order: [['post_time', 'DESC']]
@@ -79,6 +213,7 @@ app.get("/api/v1/predictions/:id", async (req, res) => {
     const results = await db.Prediction.findOne({
       include: [
         { model: db.Account },
+        { model: db.Comment },
         { model: db.PredictionVoteTally }
       ],
       where: { prediction_id: req.params.id }

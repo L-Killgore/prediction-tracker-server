@@ -54,26 +54,25 @@ CREATE TABLE prediction_vote_tallies (
 );
 
 
+-- HAVE TO ADD THIS MANUALLY INTO APP DATABASE --
+CREATE TABLE comments (
+    comment_id SERIAL PRIMARY KEY,
+    prediction_id INT NOT NULL REFERENCES predictions(prediction_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES accounts(user_id) ON DELETE CASCADE,
+    username VARCHAR ( 255 ) NOT NULL,
+    parent_id INT DEFAULT 0,
+    comment_count INT DEFAULT 0,
+    child_value INT DEFAULT 0,
+    comment TEXT NOT NULL,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);
+
+
 CREATE TABLE sources (
     source_id SERIAL PRIMARY KEY,
     reason_id INT NOT NULL REFERENCES reasons(reason_id) ON DELETE CASCADE,
     source VARCHAR ( 264 ) NOT NULL
 );
-
-CREATE TABLE discussion_nodes
-
-CREATE TABLE comments
-
-
-
-SELECT
-	p.prediction_id,
-	pl.plausible,
-	co.correct
-FROM
-	predictions p
-INNER JOIN is_plausible pl
-	ON pl.prediction_id = p.prediction_id
-INNER JOIN is_correct co
-	ON co.prediction_id = p.prediction_id
-ORDER BY p.prediction_id;
