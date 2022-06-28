@@ -33,6 +33,7 @@ module.exports = (sequelize) => {
     models.Account.hasMany(models.Prediction, { foreignKey: "user_id" });
     models.Account.hasMany(models.Vote, { foreignKey: "user_id" });
     models.Account.hasMany(models.Comment, { foreignKey: "user_id" });
+    models.Account.hasOne(models.CommentVote, { foreignKey: "user_id" });
   };
 
   return Account;

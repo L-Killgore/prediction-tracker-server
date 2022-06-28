@@ -54,18 +54,29 @@ CREATE TABLE prediction_vote_tallies (
 );
 
 
--- HAVE TO ADD THIS MANUALLY INTO APP DATABASE --
+-- HAVE TO ADD THESE COMMENT MODELS MANUALLY INTO APP DATABASE --
 CREATE TABLE comments (
     comment_id SERIAL PRIMARY KEY,
     prediction_id INT NOT NULL REFERENCES predictions(prediction_id) ON DELETE CASCADE,
     user_id INT NOT NULL REFERENCES accounts(user_id) ON DELETE CASCADE,
     username VARCHAR ( 255 ) NOT NULL,
+    super_parent_id INT DEFAULT 0,
     parent_id INT DEFAULT 0,
-    comment_count INT DEFAULT 0,
+    child_count INT DEFAULT 0,
     child_value INT DEFAULT 0,
     comment TEXT NOT NULL,
     likes INT DEFAULT 0,
     dislikes INT DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE comment_votes (
+    comment_vote_id SERIAL PRIMARY KEY,
+    comment_id INT NOT NULL REFERENCES comments(comment_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES accounts(user_id) ON DELETE CASCADE,
+    likes BOOLEAN,
+    dislikes BOOLEAN,
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL
 );

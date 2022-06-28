@@ -69,14 +69,14 @@ app.get("/api/v1/comments/:prediction_id", async (req, res) => {
 // create comment
 app.post("/api/v1/comments/create", async (req, res) => {
   try {
-    const { prediction_id, user_id, username, parent_id, comment_count, child_value, comment } = req.body;
+    const { prediction_id, user_id, username, super_parent_id, parent_id, child_value, comment } = req.body;
 
     const results = await db.Comment.create({
       prediction_id,
       user_id,
       username,
+      super_parent_id,
       parent_id,
-      comment_count,
       child_value,
       comment,
     });
@@ -93,58 +93,160 @@ app.post("/api/v1/comments/create", async (req, res) => {
   };
 });
 
-// update comment (just for like and dislike count right now)
-app.put("/api/v1/comments/:parameter/:prediction_comment_id", async (req, res) => {
-  try {
-    const { likes, dislikes } = req.body;
-    const { prediction_comment_id, parameter } = req.params;
-
-    if (parameter === "like") {
-      const results = await db.Comment.increment({
-        like: 1
-      }, {
-        where: { prediction_comment_id: prediction_comment_id }
-      });
-
-      res.status(200).json({
-        status: "success",
-        message: `Successfully updated like count for comment with id = ${prediction_comment_id}.`,
-        data: {
-          comment: results,
-        }
-      });
-    } else if (parameter === "dislike") {
-      const results = await db.Comment.increment({
-        dislike: 1
-      }, {
-        where: { prediction_comment_id: prediction_comment_id }
-      });
-
-      res.status(200).json({
-        status: "success",
-        message: `Successfully updated like count for comment with id = ${prediction_comment_id}.`,
-        data: {
-          comment: results,
-        }
-      });
-    }
-  } catch (err) {
-    console.log(err);
-  };
-});
-
 // delete comment
-app.delete("/api/v1/comments/:prediction_comment_id", async (req, res) => {
+app.delete("/api/v1/comments/:comment_id", async (req, res) => {
   try {
-    const { prediction_comment_id } = req.params;
+    const { comment_id } = req.params;
 
     await db.Comment.destroy({
-      where: { prediction_comment_id: prediction_comment_id }
+      where: { comment_id: comment_id }
     });
 
     res.status(204).json({
       status: "success",
       message: 'Successfully deleted comment.'
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// COMMENT VOTES (handles votes when vote buttons are clicked)
+// get all comment votes
+// app.get("/api/v1/comment_votes", async (req, res) => {
+//   try {
+//     const results = await db.CommentVote.findAll();
+
+//     res.status(200).json({
+//       status: "success",
+//       message: "Successfully gathered all vote tallies.",
+//       results: results.length,
+//       data: {
+//         commentVotes: results
+//       }
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// });
+
+// get all single votes for a specific comment
+app.get("/api/v1/comment-votes/:comment_id", async (req, res) => {
+  try {
+    const { comment_id } = req.params;
+
+    const results = await db.CommentVote.findAll({
+      where: { comment_id: comment_id }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: `Successfully gathered all votes for comment with id = ${comment_id}.`,
+      results: results.length,
+      data: {
+        commentVotes: results
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+// cast vote on comment
+app.post("/api/v1/comment-votes", async (req, res) => {
+  try {
+    const { comment_id, user_id, likes, dislikes } = req.body;
+
+    const results = await db.CommentVote.create({
+      comment_id,
+      user_id,
+      likes,
+      dislikes
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Successfully voted on comment.",
+      data: {
+        commentVote: results
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// update comment vote for specific comment from specific user
+app.put("/api/v1/comment-votes/:comment_vote_id", async (req, res) => {
+  try {
+    const { comment_id, user_id, likes, dislikes } = req.body;
+    const { comment_vote_id } = req.params;
+
+    const results = await db.CommentVote.update({
+      comment_id,
+      user_id,
+      likes,
+      dislikes
+    }, {
+      where: { comment_vote_id: comment_vote_id }
+    });
+
+    console.log(results);
+
+    res.status(200).json({
+      status: "success",
+      message: "Successfully updated a vote on a comment.",
+      data: {
+        commentVote: results
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// update comment vote (just for like and dislike count right now)
+app.put("/api/v1/comment-votes/:parameter/:comment_id", async (req, res) => {
+  try {
+    const { comment_id, parameter } = req.params;
+
+    if (parameter === "like-add") {
+      await db.Comment.increment({
+        likes: 1
+      }, {
+        where: { comment_id: comment_id },
+        // returning: true,
+        // plain: true
+      });
+    } else if (parameter === "dislike-add") {
+      await db.Comment.increment({
+        dislikes: 1
+      }, {
+        where: { comment_id: comment_id },
+        // returning: true,
+        // plain: true
+      });
+    } else if (parameter === "like-remove") {
+      await db.Comment.decrement({
+        likes: 1
+      }, {
+        where: { comment_id: comment_id },
+        // returning: true,
+        // plain: true
+      });
+    } else if (parameter === "dislike-remove") {
+      await db.Comment.decrement({
+        dislikes: 1
+      }, {
+        where: { comment_id: comment_id },
+        // returning: true,
+        // plain: true
+      });
+    };
+
+    res.status(200).json({
+      status: "success",
+      message: `Successfully updated like count for comment with id = ${comment_id}.`
     });
   } catch (err) {
     console.log(err);

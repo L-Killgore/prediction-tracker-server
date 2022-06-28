@@ -28,11 +28,15 @@ module.exports = (sequelize) => {
       unique: true,
       allowNull: false
     },
+    super_parent_id: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
     parent_id: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
-    comment_count: {
+    child_count: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
@@ -59,6 +63,7 @@ module.exports = (sequelize) => {
 Comment.associate = models => {
     models.Comment.belongsTo(models.Prediction, { foreignKey: "prediction_id" });
     models.Comment.belongsTo(models.Account, { foreignKey: "user_id" });
+    models.Comment.hasOne(models.CommentVote, { foreignKey: "comment_id" });
   };
 
   return Comment;
