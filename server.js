@@ -111,24 +111,26 @@ app.delete("/api/v1/comments/:comment_id", async (req, res) => {
   };
 });
 
-// COMMENT VOTES (handles votes when vote buttons are clicked)
-// get all comment votes
-// app.get("/api/v1/comment_votes", async (req, res) => {
-//   try {
-//     const results = await db.CommentVote.findAll();
 
-//     res.status(200).json({
-//       status: "success",
-//       message: "Successfully gathered all vote tallies.",
-//       results: results.length,
-//       data: {
-//         commentVotes: results
-//       }
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// });
+
+// COMMENT VOTES
+// get all comment votes
+app.get("/api/v1/comment_votes", async (req, res) => {
+  try {
+    const results = await db.CommentVote.findAll();
+
+    res.status(200).json({
+      status: "success",
+      message: "Successfully gathered all vote tallies.",
+      results: results.length,
+      data: {
+        commentVotes: results
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
+});
 
 // get all single votes for a specific comment
 app.get("/api/v1/comment-votes/:comment_id", async (req, res) => {
@@ -439,7 +441,11 @@ app.delete("/api/v1/predictions/incomplete/:user_id", async (req, res) => {
 // get all reasons
 app.get("/api/v1/reasons", async (req, res) => {
   try {
-    const results = await db.Reason.findAll();
+    const results = await db.Reason.findAll({
+      include: [
+        { model: db.Source }
+      ]
+    });
 
     res.status(200).json({
       status: "success",
@@ -457,8 +463,13 @@ app.get("/api/v1/reasons", async (req, res) => {
 app.get("/api/v1/reasons/:prediction_id", async (req, res) => {
   try {
     const { prediction_id } = req.params;
+
     const results = await db.Reason.findAll({
-      where: { prediction_id: prediction_id }
+      include: [
+        { model: db.Source }
+      ],
+      where: { prediction_id: prediction_id },
+      order: [['reason_id', 'ASC']]
     });
 
     res.status(200).json({
@@ -633,6 +644,113 @@ app.put("/api/v1/votes/update/:prediction_id/:user_id", async (req, res) => {
 
 
 
+// SOURCES
+// get all sources for a specific reason
+app.get("/api/v1/sources/:reason_id", async (req, res) => {
+  try {
+    const { reason_id } = req.params;
+
+    const results = await db.Source.findAll({
+      where: { reason_id: reason_id }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: `Successfully gathered sources for reason with id = ${reason_id}`,
+      data: {
+        sources: results
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// add source to a specific reason
+app.post("/api/v1/sources", async (req, res) => {
+  try {
+    const { reason_id, source_type, author1_last, author1_initial, author1_first, author2_last, author2_initial, author2_first, et_al, publication_date, publisher_name, title, edition, volume, issue, pages,  url, database_name, uploader_name, accessed_date } = req.body;
+
+    const results = await db.Source.create({
+      reason_id,
+      source_type,
+      author1_last,
+      author1_initial,
+      author1_first,
+      author2_last,
+      author2_initial,
+      author2_first,
+      et_al,
+      publication_date,
+      publisher_name,
+      title,
+      edition,
+      volume,
+      issue,
+      pages,
+      url,
+      database_name,
+      uploader_name,
+      accessed_date
+    },{
+      returning: true,
+      plain: true
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: `Successfully added a source to reason with id = ${reason_id}`,
+      data: {
+        source: results
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+app.put("/api/v1/sources/:source_id", async (req, res) => {
+  try {
+    const { source_id } = req.params;
+    const { reason } = req.body;
+
+    const results = await db.Reason.update({
+      reason
+    }, {
+      where: { reason_id: id }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Successfully updated reason.",
+      data: {
+        reason: results
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+// delete source for a specific reason
+app.delete("/api/v1/sources/:source_id", async (req, res) => {
+  try {
+    const { source_id } = req.params;
+
+    await db.Source.destroy({
+      where: { source_id: source_id }
+    });
+
+    res.status(204).json({
+      status: `successfully deleted source with source_id = ${source_id}`,
+    });
+  } catch (err) {
+    console.log(err);
+  };
+});
+
+
+
 // VOTES TALLY TABLE (handles aggregating the single votes for a prediction into one place)
 // get all vote tallies
 app.get("/api/v1/votes/tallies", async (req, res) => {
@@ -757,69 +875,6 @@ app.put("/api/v1/votes/tallies/:tally_value/:prediction_id", async (req, res) =>
         }
       });
     };
-  } catch (err) {
-    console.log(err);
-  };
-});
-
-
-
-// SOURCES not yet implemented
-// get all sources for a specific minor claim
-app.get("/api/v1/sources/:minor_claim_id", async (req, res) => {
-  try {
-    const { minor_claim_id } = req.params;
-
-    const results = await db.Source.findAll({
-      where: { minor_claim_id: minor_claim_id }
-    });
-
-    res.status(200).json({
-      status: "success",
-      message: `Successfully gathered sources for minor claim with id = ${minor_claim_id}`,
-      data: {
-        sources: results
-      }
-    });
-  } catch (err) {
-    console.log(err);
-  };
-});
-
-// add source to a specific minor claim
-app.post("/api/v1/sources", async (req, res) => {
-  try {
-    const { minor_claim_id, source } = req.body;
-
-    const results = await db.Source.create({
-      minor_claim_id,
-      source
-    });
-
-    res.status(200).json({
-      status: "success",
-      message: `Successfully added a source to minor claim with id = ${minor_claim_id}`,
-      data: {
-        source: results
-      }
-    });
-  } catch (err) {
-    console.log(err);
-  };
-});
-
-// delete source for a specific minor claim
-app.delete("/api/v1/sources/:source_id", async (req, res) => {
-  try {
-    const { source_id } = req.params;
-
-    const results = await db.Source.destroy({
-      where: { source_id: source_id }
-    });
-
-    res.status(204).json({
-      status: `successfully deleted source with source_id = ${source_id}`,
-    });
   } catch (err) {
     console.log(err);
   };
