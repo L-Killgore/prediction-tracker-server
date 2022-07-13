@@ -25,6 +25,7 @@ module.exports = (sequelize) => {
 
   Reason.associate = models => {
     models.Reason.belongsTo(models.Prediction, { foreignKey: "prediction_id" })
+    models.Reason.hasMany(models.Source, { foreignKey: "reason_id" })
   };
 
   return Reason;
