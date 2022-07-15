@@ -43,6 +43,7 @@ CREATE TABLE predictions (
     claim_major VARCHAR ( 264 ) NOT NULL,
     post_time TIMESTAMPTZ NOT NULL,
     timeframe TIMESTAMPTZ NOT NULL,
+    category VARCHAR ( 24 ) NOT NULL,
     status VARCHAR ( 10 ) NOT NULL,
     conc_reason TEXT,
     conc_reason_timestamp TIMESTAMPTZ,

@@ -35,6 +35,10 @@ module.exports = (sequelize) => {
       type: DataTypes.DATE,
       allowNull: false
     },
+    category: {
+      type: DataTypes.STRING(24),
+      allowNull: false
+    },
     status: {
       type: DataTypes.STRING(10),
       allowNull: false

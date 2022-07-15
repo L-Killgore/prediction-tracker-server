@@ -290,6 +290,7 @@ app.get("/api/v1/predictions/timeframe", async (req, res) => {
     const results = await db.Prediction.findAll({
       include: [
         { model: db.Account },
+        { model: db.Comment },
         { model: db.PredictionVoteTally }
       ],
       where: {
@@ -338,7 +339,7 @@ app.get("/api/v1/predictions/:id", async (req, res) => {
 // create prediction
 app.post("/api/v1/predictions", async (req, res) => {
   try {
-    const { user_id, user_prediction_status, claim_title, claim_major, timeframe, post_time, status, conc_reason, conc_reason_timestamp } = req.body;
+    const { user_id, user_prediction_status, claim_title, claim_major, timeframe, category, post_time, status, conc_reason, conc_reason_timestamp } = req.body;
 
     const results = await db.Prediction.create({
       user_id,
@@ -346,6 +347,7 @@ app.post("/api/v1/predictions", async (req, res) => {
       claim_title,
       claim_major,
       timeframe,
+      category,
       post_time,
       status,
       conc_reason,
@@ -367,7 +369,7 @@ app.post("/api/v1/predictions", async (req, res) => {
 // update prediction
 app.put("/api/v1/predictions/:id", async (req, res) => {
   try {
-    const { user_id, user_prediction_status, claim_title, claim_major, timeframe, post_time, status, conc_reason, conc_reason_timestamp } = req.body;
+    const { user_id, user_prediction_status, claim_title, claim_major, timeframe, category, post_time, status, conc_reason, conc_reason_timestamp } = req.body;
     const { id } = req.params;
 
     const results = await db.Prediction.update({
@@ -376,6 +378,7 @@ app.put("/api/v1/predictions/:id", async (req, res) => {
       claim_title,
       claim_major,
       timeframe,
+      category,
       post_time,
       status,
       conc_reason,
